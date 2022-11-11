@@ -1,49 +1,56 @@
-import React from "react";
+import React, {useState, useEffect} from "react";
 import { Section } from "./Section";
 import { FeedbackOptions } from "./Feedback";
 import { Statistics } from "./Statistics";
 import { Notification } from "./Notifications";
 
-export class App extends React.Component {
-   state = {
-      good:0,
-      neutral:0,
-      bad:0,
-   };
-   ///////////////Count Total Feedback
- total = () => {
-   return this.state.good + this.state.neutral + this.state.bad;
+
+export const App = () => {
+ const [good , setGood] = useState(0);
+ const [neutral, setNeutral] = useState(0);
+ const [bad, setBad] = useState(0);
+ const [total, setTotal] = useState(0);
+ const [positive, setPositive] = useState(0);
+
+  ///////////////Count Total Feedback
+const countTotal = (good, neutral, bad) => {
+   return good + neutral + bad;
  };
+
 // //////Count Total Positive Percentage
-countPositivePercentage = () => {
+const countPositivePercentage = (good, total) => {
    let percentage = Math.floor(
-     ((this.state.good / this.total()) * 100).toFixed(0)
+     ((good / total) * 100).toFixed(0)
    );
    if (isNaN(percentage)) {
      return 0;
    } else return percentage;
  };
+// ///
+useEffect(() => {
+   setTotal (countTotal(good, neutral, bad));
+   setPositive (countPositivePercentage(good, total));
+}, [good,neutral, bad, total])
 //
-reviewClick = whichButtonWasClicked => {
+const reviewClick = whichButtonWasClicked => {
    switch (whichButtonWasClicked) {
      case 'good':
-       this.setState(state => ({ good: state.good + 1 }));
+      setGood(good + 1);
        break;
      case 'neutral':
-       this.setState(state => ({ neutral: state.neutral + 1 }));
+      setNeutral(neutral + 1);
        break;
      case 'bad':
-       this.setState(state => ({ bad: state.bad + 1 }));
+      setBad(bad + 1);
        break;
      default:
        return 0;
    }
  };
-////////////////////    RENDER   ////////////
-   render(){
-      const {good,neutral,bad}= this.state;
+////////////////////    RENDER   ////////////////////
          return(
-            <div style={{
+            <div 
+               style={{
                height: '100%',
                display: 'flex',
                justifyContent: 'center',
@@ -54,22 +61,23 @@ reviewClick = whichButtonWasClicked => {
                padding: '20px 10px',
             }}>
                <Section title='Please leave your feedback'>
-                  <FeedbackOptions options={Object.keys(this.state)} onLeaveFeedback={this.reviewClick} >
+                  <FeedbackOptions 
+                     options = {['good', 'neutral', 'bad']}  
+                     onLeaveFeedback={reviewClick} >
                   </FeedbackOptions>
                </Section>
                <Section title="Statistics">
-                  {this.total() ===0 
+                  {total ===0 
                   ?( <Notification message='There is no feedback'></Notification>)
-                  :( <Statistics good={good} neutral={neutral} bad={bad} total={this.total()} 
-                  positivefeedback={this.countPositivePercentage()}>
+                  :( <Statistics 
+                     good={good} 
+                     neutral={neutral} 
+                     bad={bad} 
+                     total={total} 
+                     positivefeedback={positive}>
                   </Statistics> )}
                </Section>
-
             </div>
-         )
-   }
-
-
-
-}
+         );
+      }
 
